@@ -14,11 +14,23 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# قاموس الردود التلقائية
+auto_responses = {
+    'السلام عليكم': 'وعليكم السلام ورحمة الله وبركاته 👋',
+    'مرحبا': 'أهلا وسهلا بك! 😊',
+    'hello': 'Hello! Welcome! 👋',
+    'كيفك': 'الحمد لله أنا بخير، وأنت كيف حالك؟',
+    'شكرا': 'لا شكر على واجب 😊',
+    'thank you': 'You\'re welcome! 😊',
+    'صباح الخير': 'صباح النور والسرور 🌞',
+    'مساء الخير': 'مساء النور 🌙',
+}
+
 # عند تشغيل البوت بنجاح
 @bot.event
 async def on_ready():
     print(f'{bot.user} تم تسجيل الدخول بنجاح!')
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="المساعدة"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="الرسائل"))
 
 # ترحيب عند انضمام عضو جديد
 @bot.event
@@ -33,45 +45,26 @@ async def on_member_join(member):
             color=discord.Color.green()
         )
         embed.set_thumbnail(url=member.avatar.url)
-        embed.set_image(url="https://media.discordapp.net/attachments/YOUR_IMAGE_URL")
         
         await welcome_channel.send(embed=embed)
 
-# رد تلقائي على رسائل معينة
+# رد تلقائي على الرسائل
 @bot.event
 async def on_message(message):
     # تجنب الرد على رسائل البوت
     if message.author == bot.user:
         return
     
-    # رد تلقائي على كلمات معينة
-    if 'السلام عليكم' in message.content:
-        await message.reply('وعليكم السلام ورحمة الله وبركاته 👋')
+    # البحث عن كلمات مفتاحية والرد عليها
+    message_content = message.content.lower().strip()
     
-    if 'مرحبا' in message.content or 'hello' in message.content.lower():
-        embed = discord.Embed(
-            title="مرحباً!",
-            description=f"مرحباً {message.author.mention}",
-            color=discord.Color.blue()
-        )
-        embed.set_image(url="https://media.discordapp.net/attachments/YOUR_IMAGE_URL")
-        await message.reply(embed=embed)
+    for keyword, response in auto_responses.items():
+        if keyword in message_content:
+            await message.reply(response)
+            return
     
     # معالجة الأوامر العادية
     await bot.process_commands(message)
-
-# أمر بسيط للاختبار
-@bot.command(name='مرحبا')
-async def hello(ctx):
-    embed = discord.Embed(
-        title="أهلا وسهلا!",
-        description=f"السلام عليكم {ctx.author.mention}",
-        color=discord.Color.purple()
-    )
-    embed.set_image(url="https://media.discordapp.net/attachments/YOUR_IMAGE_URL")
-    embed.set_footer(text="بواسطة بوتك الخاص")
-    
-    await ctx.send(embed=embed)
 
 # تشغيل البوت
 bot.run(TOKEN)
