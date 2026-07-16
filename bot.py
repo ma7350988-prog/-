@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+if not TOKEN:
+    raise ValueError("DISCORD_TOKEN is not set in environment variables!")
+
 # إعداد البوت
 intents = discord.Intents.default()
 intents.message_content = True
@@ -66,5 +69,15 @@ async def on_message(message):
     # معالجة الأوامر العادية
     await bot.process_commands(message)
 
+# معالجة الأخطاء
+@bot.event
+async def on_error(event, *args, **kwargs):
+    print(f'خطأ في {event}:')
+    import traceback
+    traceback.print_exc()
+
 # تشغيل البوت
-bot.run(TOKEN)
+try:
+    bot.run(TOKEN)
+except Exception as e:
+    print(f"فشل تشغيل البوت: {e}")
